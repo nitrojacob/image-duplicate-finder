@@ -22,19 +22,15 @@ Controls Fuzziness of the matching. Larger values call for more exact match.
 Recommended value for large population: (8 + log256(unique_individuals))'''
 hash_size = 8
 
+'''Number of parallel threads that read from disk and compute the hash'''
+threads = 8
+
 #Queue length ~ Disk wait to hide
-mQueue = queue.Queue(512)
+mQueue = queue.Queue(threads * 16)
 myDict = {}
 
-def sequential_function(files):
-    for file in files:
-        imHash = imagehash.phash(Image.open(file), hash_size)
-        if(myDict.get(imHash)):
-            myDict[imHash].append(file)
-        else:
-            myDict[imHash] = [file]
-
-def read_from_disk_to_queue(file):
+def read_from_disk_to_queue(files):
+    #print(files)
     for file in files:
         mQueue.put({'name':file, 'img':imagehash.phash(Image.open(file))})
 
@@ -67,10 +63,10 @@ files = glob.glob(location)
 print("Total images = ", len(files))
 t1 = threading.Thread(target = compute_hash_and_search)
 t1.start()
-olist = split_list(files, 16)
+olist = split_list(files, threads)
 prod = []
-for pfiles in olist:
-    prod.append(threading.Thread(target = lambda:read_from_disk_to_queue(pfiles)))
+for i in range(len(olist)):
+    prod.append(threading.Thread(target = lambda:read_from_disk_to_queue(olist[i])))
     prod[-1].start()
 for t in prod:
     t.join()
