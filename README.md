@@ -9,7 +9,7 @@ idf-mt can do a full search and match of 2,00,000 images of CelebA dataset in 45
 Single threaded implementation of the image-duplicate-finder. Slow(in-efficient compute resource use) but easy to learn the algorithm. And of same compute complexity as idf-mt.py
 
 
-##idf-mt.py
+## idf-mt.py
 Multi-threaded implementation of the image-duplicate-finder. Parallelises read from the disk, and tries to hide disk access latency; which is very prominent in case of HDDs
 
 Threads[n-1:0]
